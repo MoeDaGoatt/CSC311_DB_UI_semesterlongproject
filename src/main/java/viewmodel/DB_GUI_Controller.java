@@ -1,12 +1,18 @@
 package viewmodel;
 
+import com.azure.storage.blob.BlobClient;
 import dao.DbConnectivityClass;
+import dao.StorageUploader;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ProgressBar;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -21,14 +27,46 @@ import javafx.stage.Stage;
 import model.Person;
 import service.MyLogger;
 
-import java.io.File;
+import java.io.*;
 import java.net.URL;
-import java.time.LocalDate;
+import java.nio.file.Files;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-public class DB_GUI_Controller implements Initializable {
 
+public class DB_GUI_Controller implements Initializable {
+    private static final String Rname = "^[A-Za-z]{1,50}$";
+    private static final String Rdep = "^[A-Za-z\\s]{1,50}$";
+    private static final String Rmajors = "^[A-Za-z\\s]{1,50}$";
+    private static final String Remail = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private Button editBtn;
+    @FXML
+    private Button deleteBtn;
+    @FXML
+    private MenuItem editItem;
+    @FXML
+    private MenuItem deleteItem;
+    @FXML
+    private MenuItem ClearItem;
+    @FXML
+    private MenuItem CopyItem;
+    @FXML
+    private Button addBtn;
+
+    @FXML
+    private MenuItem exportCSV;
+    @FXML
+    private MenuItem importCSV;
+    @FXML
+    private ComboBox<Major> majorComboBox;
+
+    StorageUploader store = new StorageUploader();
+    @FXML
+    ProgressBar progressBar;
     @FXML
     TextField first_name, last_name, department, major, email, imageURL;
     @FXML
@@ -54,22 +92,129 @@ public class DB_GUI_Controller implements Initializable {
             tv_major.setCellValueFactory(new PropertyValueFactory<>("major"));
             tv_email.setCellValueFactory(new PropertyValueFactory<>("email"));
             tv.setItems(data);
+
+            editBtn.setDisable(true);
+            deleteBtn.setDisable(true);
+
+            editItem.setDisable(true);
+            deleteItem.setDisable(true);
+            ClearItem.setDisable(true);
+            CopyItem.setDisable(true);
+
+            tv.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Person>() {
+                @Override
+                public void changed(ObservableValue<? extends Person> observable, Person oldValue, Person newValue) {
+                    editBtn.setDisable(newValue == null);
+                    deleteBtn.setDisable(newValue == null);
+                    ClearItem.setDisable(newValue == null);
+                    boolean isSelected = newValue != null;
+                    editItem.setDisable(!isSelected);
+                    deleteItem.setDisable(!isSelected);
+                }
+            });
+            first_name.textProperty().addListener((observable, oldValue, newValue) -> validateClear());
+            last_name.textProperty().addListener((observable, oldValue, newValue) -> validateClear());
+            department.textProperty().addListener((observable, oldValue, newValue) -> validateClear());
+            majorComboBox.valueProperty().addListener((observable, oldValue, newValue) -> validateClear());
+            email.textProperty().addListener((observable, oldValue, newValue) -> validateClear());
+            //  imageURL.textProperty().addListener((observable, oldValue, newValue) -> validateClear());
+
+
+            addBtn.setDisable(true);
+
+            //comboBox
+            majorComboBox.setItems(FXCollections.observableArrayList(Major.values()));
+            majorComboBox.getSelectionModel().selectFirst();
+
+            first_name.textProperty().addListener((observable, oldValue, newValue) -> validateForm());
+            last_name.textProperty().addListener((observable, oldValue, newValue) -> validateForm());
+            department.textProperty().addListener((observable, oldValue, newValue) -> validateForm());
+            majorComboBox.valueProperty().addListener((observable, oldValue, newValue) -> validateForm());
+            email.textProperty().addListener((observable, oldValue, newValue) -> validateForm());
+            // imageURL.textProperty().addListener((observable, oldValue, newValue) -> validateForm());
+
+
+            addBtn.setOnAction(event -> {
+                if (checkAllFields()) {
+                    Person p = new Person(
+                            first_name.getText(),
+                            last_name.getText(),
+                            department.getText(),
+                            majorComboBox.getValue().toString(),
+                            email.getText(),
+                            imageURL.getText()
+                    );
+
+                    cnUtil.insertUser(p);
+                    cnUtil.retrieveId(p);
+                    p.setId(cnUtil.retrieveId(p));
+                    data.add(p);
+                    clearForm();
+                } else {
+                    showError();
+                }
+            });
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    private void validateForm() {
+        boolean isFormFilled = !first_name.getText().isEmpty() ||
+                !last_name.getText().isEmpty() ||
+                !department.getText().isEmpty() ||
+                majorComboBox.getValue() != null ||
+                !email.getText().isEmpty();
+
+        ClearItem.setDisable(!isFormFilled && tv.getSelectionModel().getSelectedItem() == null);
+    }
+
+    private void validateClear() {
+        boolean isFormFilled = !first_name.getText().isEmpty() ||
+                !last_name.getText().isEmpty() ||
+                !department.getText().isEmpty() ||
+                majorComboBox.getValue() != null ||
+                !email.getText().isEmpty();
+        addBtn.setDisable(!isFormFilled);
+        ClearItem.setDisable(!isFormFilled && tv.getSelectionModel().getSelectedItem() == null);
+    }
+
+
+    private boolean checkAllFields() {
+        boolean isFormValid = first_name.getText().matches(Rname) &&
+                last_name.getText().matches(Rname) &&
+                department.getText().matches(Rdep) &&
+                majorComboBox.getValue() != null &&
+                email.getText().matches(Remail);
+
+        if (!isFormValid) {
+            showError();
+        }
+        return isFormValid;
+
+    }
+
+    private void showError() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Invalid Input");
+        alert.setHeaderText("Please try again");
+        alert.setContentText("One or more fields have invalid input.Make sure you are using the farmingdale email");
+
+        alert.showAndWait();
+    }
+
     @FXML
     protected void addNewRecord() {
-
+        if (checkAllFields()) {
             Person p = new Person(first_name.getText(), last_name.getText(), department.getText(),
-                    major.getText(), email.getText(), imageURL.getText());
+                    majorComboBox.getValue().toString(), email.getText(), imageURL.getText());
             cnUtil.insertUser(p);
             cnUtil.retrieveId(p);
             p.setId(cnUtil.retrieveId(p));
             data.add(p);
             clearForm();
-
+        }
     }
 
     @FXML
@@ -77,10 +222,11 @@ public class DB_GUI_Controller implements Initializable {
         first_name.setText("");
         last_name.setText("");
         department.setText("");
-        major.setText("");
+        majorComboBox.getSelectionModel().clearSelection();
         email.setText("");
         imageURL.setText("");
     }
+
 
     @FXML
     protected void logOut(ActionEvent actionEvent) {
@@ -119,7 +265,7 @@ public class DB_GUI_Controller implements Initializable {
         Person p = tv.getSelectionModel().getSelectedItem();
         int index = data.indexOf(p);
         Person p2 = new Person(index + 1, first_name.getText(), last_name.getText(), department.getText(),
-                major.getText(), email.getText(),  imageURL.getText());
+                majorComboBox.getValue().toString(), email.getText(), imageURL.getText());
         cnUtil.editUser(p.getId(), p2);
         data.remove(p);
         data.add(index, p2);
@@ -140,7 +286,39 @@ public class DB_GUI_Controller implements Initializable {
         File file = (new FileChooser()).showOpenDialog(img_view.getScene().getWindow());
         if (file != null) {
             img_view.setImage(new Image(file.toURI().toString()));
+            Task<Void> uploadTask = createUploadTask(file, progressBar);
+            progressBar.progressProperty().bind(uploadTask.progressProperty());
+            new Thread(uploadTask).start();
         }
+    }
+
+    private Task<Void> createUploadTask(File file, ProgressBar progressBar) {
+        return new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                BlobClient blobClient = store.getContainerClient().getBlobClient(file.getName());
+                long fileSize = Files.size(file.toPath());
+                long uploadedBytes = 0;
+
+                try (FileInputStream fileInputStream = new FileInputStream(file);
+                     OutputStream blobOutputStream = blobClient.getBlockBlobClient().getBlobOutputStream()) {
+
+                    byte[] buffer = new byte[1024 * 1024]; // 1 MB buffer size
+                    int bytesRead;
+
+                    while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                        blobOutputStream.write(buffer, 0, bytesRead);
+                        uploadedBytes += bytesRead;
+
+                        // Calculate and update progress as a percentage
+                        int progress = (int) ((double) uploadedBytes / fileSize * 100);
+                        updateProgress(progress, 100);
+                    }
+                }
+
+                return null;
+            }
+        };
     }
 
     @FXML
@@ -154,10 +332,13 @@ public class DB_GUI_Controller implements Initializable {
         first_name.setText(p.getFirstName());
         last_name.setText(p.getLastName());
         department.setText(p.getDepartment());
-        major.setText(p.getMajor());
+        majorComboBox.setValue(Major.valueOf(p.getMajor()));
         email.setText(p.getEmail());
         imageURL.setText(p.getImageURL());
     }
+
+
+
 
     public void lightTheme(ActionEvent actionEvent) {
         try {
@@ -214,6 +395,7 @@ public class DB_GUI_Controller implements Initializable {
         });
     }
 
+
     private static enum Major {Business, CSC, CPIS}
 
     private static class Results {
@@ -228,5 +410,4 @@ public class DB_GUI_Controller implements Initializable {
             this.major = venue;
         }
     }
-
 }
