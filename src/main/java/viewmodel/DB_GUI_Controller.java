@@ -437,21 +437,25 @@ public class DB_GUI_Controller implements Initializable {
     public void exportCSVFile(ActionEvent actionEvent) {
         FileChooser fc = new FileChooser();
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-        File file =fc.showOpenDialog(menuBar.getScene().getWindow());
+        File file =fc.showOpenDialog(null);
 
         if(file != null) {
             try(FileWriter write = new FileWriter(file)) {
                 write.append("ID,First NAme, Last Name, Department, Major, Email, Image URL\n");
-                for (Person person : data) {
-                    write.append(person.getId() + ",");
-                    write.append(person.getFirstName() + ",");
-                    write.append(person.getLastName()+ ",");
-                    write.append(person.getDepartment() + ",");
-                    write.append(person.getMajor()+ ",");
-                    write.append(person.getEmail() + ",");
-                    write.append(person.getImageURL() + "\n");
+                if (data != null && !data.isEmpty()) {
+                    for (Person person : data) {
+                        write.append(person.getId() + ",");
+                        write.append(person.getFirstName() + ",");
+                        write.append(person.getLastName() + ",");
+                        write.append(person.getDepartment() + ",");
+                        write.append(person.getMajor() + ",");
+                        write.append(person.getEmail() + ",");
+                        write.append(person.getImageURL() + "\n");
+                    }
+                    statusMessageLabel.setText("Data was exported Successfully");
+                } else {
+                    statusMessageLabel.setText("No data available to export");
                 }
-                statusMessageLabel.setText("Data was exported Successfully");
             } catch (IOException e) {
                 statusMessageLabel.setText("Error exporting the data");
                 e.printStackTrace();
