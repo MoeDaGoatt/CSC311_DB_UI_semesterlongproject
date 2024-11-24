@@ -3,6 +3,7 @@ package viewmodel;
 import com.azure.storage.blob.BlobClient;
 import dao.DbConnectivityClass;
 import dao.StorageUploader;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -24,6 +25,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import model.Person;
 import service.MyLogger;
 
@@ -41,7 +43,7 @@ public class DB_GUI_Controller implements Initializable {
     private static final String Rmajors = "^[A-Za-z\\s]{1,50}$";
     private static final String Remail = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
     @FXML
-    private Label statusLabel;
+    private Label statusMessageLabel;
     @FXML
     private Button editBtn;
     @FXML
@@ -117,7 +119,7 @@ public class DB_GUI_Controller implements Initializable {
             department.textProperty().addListener((observable, oldValue, newValue) -> validateClear());
             majorComboBox.valueProperty().addListener((observable, oldValue, newValue) -> validateClear());
             email.textProperty().addListener((observable, oldValue, newValue) -> validateClear());
-            //  imageURL.textProperty().addListener((observable, oldValue, newValue) -> validateClear());
+            imageURL.textProperty().addListener((observable, oldValue, newValue) -> validateClear());
 
 
             addBtn.setDisable(true);
@@ -131,7 +133,7 @@ public class DB_GUI_Controller implements Initializable {
             department.textProperty().addListener((observable, oldValue, newValue) -> validateForm());
             majorComboBox.valueProperty().addListener((observable, oldValue, newValue) -> validateForm());
             email.textProperty().addListener((observable, oldValue, newValue) -> validateForm());
-            // imageURL.textProperty().addListener((observable, oldValue, newValue) -> validateForm());
+            imageURL.textProperty().addListener((observable, oldValue, newValue) -> validateForm());
 
 
             addBtn.setOnAction(event -> {
@@ -150,6 +152,7 @@ public class DB_GUI_Controller implements Initializable {
                     p.setId(cnUtil.retrieveId(p));
                     data.add(p);
                     clearForm();
+                    displayMessage("Person added successfully");
                 } else {
                     showError();
                 }
@@ -214,6 +217,10 @@ public class DB_GUI_Controller implements Initializable {
             p.setId(cnUtil.retrieveId(p));
             data.add(p);
             clearForm();
+            displayMessage("Person added successfully");
+        }
+        else {
+            displayMessage("PLease check if the fields match the requirements");
         }
     }
 
@@ -270,6 +277,7 @@ public class DB_GUI_Controller implements Initializable {
         data.remove(p);
         data.add(index, p2);
         tv.getSelectionModel().select(index);
+        displayMessage("Updated Successfully!");
     }
 
     @FXML
@@ -395,6 +403,63 @@ public class DB_GUI_Controller implements Initializable {
         });
     }
 
+    public void importCSVFile(ActionEvent actionEvent) {
+        FileChooser fc = new FileChooser();
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        File file = fc.showOpenDialog(menuBar.getScene().getWindow());
+
+        if(file != null) {
+            try(BufferedReader reader = Files.newBufferedReader(file.toPath())) {
+                String line;
+                int num=0;
+                reader.readLine();
+                while ((line= reader.readLine()) != null) {
+                    String [] data = line.split(",");
+                    if(data.length == 7) {
+                        Person p = new Person(Integer.parseInt(data[0]), data[1], data[2], data[3], data[4], data[5], data[6]);
+                        cnUtil.insertUser(p);
+                        this.data.add(p);
+                    }
+                    else {
+                        statusMessageLabel.setText("Incorrect csv format file");
+                        break;
+                    }
+                    num ++;
+                }
+                statusMessageLabel.setText("Data imported successfully");
+            } catch (IOException e) {
+                statusMessageLabel.setText("Data was not imported successfully");
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void exportCSVFile(ActionEvent actionEvent) {
+        FileChooser fc = new FileChooser();
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        File file =fc.showOpenDialog(menuBar.getScene().getWindow());
+
+        if(file != null) {
+            try(FileWriter write = new FileWriter(file)) {
+                write.append("ID,First NAme, Last Name, Department, Major, Email, Image URL\n");
+                for (Person person : data) {
+                    write.append(person.getId() + ",");
+                    write.append(person.getFirstName() + ",");
+                    write.append(person.getLastName()+ ",");
+                    write.append(person.getDepartment() + ",");
+                    write.append(person.getMajor()+ ",");
+                    write.append(person.getEmail() + ",");
+                    write.append(person.getImageURL() + "\n");
+                }
+                statusMessageLabel.setText("Data was exported Successfully");
+            } catch (IOException e) {
+                statusMessageLabel.setText("Error exporting the data");
+                e.printStackTrace();
+            }
+        }
+
+    }
+
 
     private static enum Major {Business, CSC, CPIS}
 
@@ -409,5 +474,11 @@ public class DB_GUI_Controller implements Initializable {
             this.lname = date;
             this.major = venue;
         }
+    }
+    private void displayMessage(String message) {
+        statusMessageLabel.setText(message);
+        PauseTransition pause = new PauseTransition(Duration.seconds(3));
+        pause.setOnFinished(event -> statusMessageLabel.setText(""));
+        pause.play();
     }
 }
