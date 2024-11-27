@@ -39,8 +39,8 @@ import java.util.ResourceBundle;
 
 public class DB_GUI_Controller implements Initializable {
     private static final String Rname = "^[A-Za-z]{1,50}$";
-    private static final String Rdep = "^[A-Za-z\\s]{1,50}$";
-    private static final String Rmajors = "^[A-Za-z\\s]{1,50}$";
+    private static final String Rdep = "^^[A-Za-z\\\\s]{1,50}$";
+    private static final String Rmajors = "^[A-Za-z\\\\s]{1,50}$";
     private static final String Remail = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
     @FXML
     private Label statusMessageLabel;
@@ -408,61 +408,89 @@ public class DB_GUI_Controller implements Initializable {
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
         File file = fc.showOpenDialog(menuBar.getScene().getWindow());
 
-        if(file != null) {
-            try(BufferedReader reader = Files.newBufferedReader(file.toPath())) {
+        if (file != null) {
+            try (BufferedReader reader = Files.newBufferedReader(file.toPath())) {
                 String line;
-                int num=0;
-                reader.readLine();
-                while ((line= reader.readLine()) != null) {
-                    String [] data = line.split(",");
-                    if(data.length == 7) {
-                        Person p = new Person(Integer.parseInt(data[0]), data[1], data[2], data[3], data[4], data[5], data[6]);
-                        cnUtil.insertUser(p);
-                        this.data.add(p);
+                int lineNumber = 0;
+                boolean hasErrors = false;
+
+                reader.readLine(); // Skip header row
+                while ((line = reader.readLine()) != null) {
+                    lineNumber++;
+                    String[] data = line.split(",");
+                    if (data.length == 7) {
+                        try {
+                            Person p = new Person(
+                                    Integer.parseInt(data[0]),
+                                    data[1],
+                                    data[2],
+                                    data[3],
+                                    data[4],
+                                    data[5],
+                                    data[6]
+                            );
+                            cnUtil.insertUser(p);
+                            this.data.add(p);
+                        } catch (NumberFormatException e) {
+                            hasErrors = true;
+                            System.err.println("Invalid number format on line " + lineNumber + ": " + line);
+                        }
+                    } else {
+                        hasErrors = true;
+                        System.err.println("Invalid row format on line " + lineNumber + ": " + line);
                     }
-                    else {
-                        statusMessageLabel.setText("Incorrect csv format file");
-                        break;
-                    }
-                    num ++;
                 }
-                statusMessageLabel.setText("Data imported successfully");
+
+                if (hasErrors) {
+                    statusMessageLabel.setText("Import completed with some errors. Check logs for details.");
+                } else {
+                    statusMessageLabel.setText("Data imported successfully.");
+                }
             } catch (IOException e) {
-                statusMessageLabel.setText("Data was not imported successfully");
-                throw new RuntimeException(e);
+                statusMessageLabel.setText("Error reading the file.");
+                e.printStackTrace();
             }
+        } else {
+            statusMessageLabel.setText("No file selected.");
         }
     }
+
 
     public void exportCSVFile(ActionEvent actionEvent) {
         FileChooser fc = new FileChooser();
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-        File file =fc.showOpenDialog(null);
+        File file = fc.showSaveDialog(menuBar.getScene().getWindow());
 
-        if(file != null) {
-            try(FileWriter write = new FileWriter(file)) {
-                write.append("ID,First NAme, Last Name, Department, Major, Email, Image URL\n");
+        if (file != null) {
+            try (FileWriter writer = new FileWriter(file)) {
+                // Write header row
+                writer.append("ID,First Name,Last Name,Department,Major,Email,Image URL\n");
+
                 if (data != null && !data.isEmpty()) {
                     for (Person person : data) {
-                        write.append(person.getId() + ",");
-                        write.append(person.getFirstName() + ",");
-                        write.append(person.getLastName() + ",");
-                        write.append(person.getDepartment() + ",");
-                        write.append(person.getMajor() + ",");
-                        write.append(person.getEmail() + ",");
-                        write.append(person.getImageURL() + "\n");
+                        writer.append(String.format("%d,%s,%s,%s,%s,%s,%s\n",
+                                person.getId(),
+                                person.getFirstName(),
+                                person.getLastName(),
+                                person.getDepartment(),
+                                person.getMajor(),
+                                person.getEmail(),
+                                person.getImageURL()
+                        ));
                     }
-                    statusMessageLabel.setText("Data was exported Successfully");
+                    statusMessageLabel.setText("Data exported successfully.");
                 } else {
-                    statusMessageLabel.setText("No data available to export");
+                    statusMessageLabel.setText("No data available to export.");
                 }
             } catch (IOException e) {
-                statusMessageLabel.setText("Error exporting the data");
+                statusMessageLabel.setText("Error writing to the file.");
                 e.printStackTrace();
             }
+        } else {
+            statusMessageLabel.setText("Export cancelled.");
         }
-
     }
+
 
 
     private static enum Major {Business, CSC, CPIS}

@@ -1,0 +1,57 @@
+.root  {
+    -fx-font-family: "Calibri";
+    -fx-background-color: light grey;
+    -fx-padding: 20px;
+}
+.label {
+    -fx-text-fill: Black;
+    -fx-font-size: 32px;
+    -fx-font-weigth: bold;
+    -fx-padding: 20px 0;
+}
+
+/* Input Fields */
+.text-field, .password-field {
+    -fx-border-color: #cccccc;
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 10px;
+    -fx-font-size: 16px;
+}
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #4CAF50;
+    -fx-background-color: #ffffff;
+}
+
+.text-field, .password-field {
+    -fx-pref-width: 300px;
+}
+
+.button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #45a049;
+}
+
+.button.secondary {
+    -fx-background-color: #607D8B;
+}
+
+.button.secondary:hover {
+    -fx-background-color: #546E7A;
+}
+
+.vbox {
+    -fx-alignment: center;
+    -fx-spacing: 15px;
+}

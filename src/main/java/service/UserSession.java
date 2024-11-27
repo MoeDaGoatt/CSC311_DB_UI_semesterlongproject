@@ -9,7 +9,6 @@ public class UserSession {
     private static volatile UserSession instance;
 
     private final String userName;
-
     private final String password;
     private final String privileges;
 
@@ -19,13 +18,14 @@ public class UserSession {
         this.privileges = privileges;
         savePref();
     }
-    private synchronized void savePref() {
-        Preferences userPreferences = Preferences.userRoot();
-        userPreferences.put("USERNAME", userName);
-        userPreferences.put("PASSWORD", password);
-        userPreferences.put("PRIVILEGES", privileges);
+    private  void savePref() {
+        synchronized (Preferences.userRoot()) {
+            Preferences userPreferences = Preferences.userRoot();
+            userPreferences.put("USERNAME", userName);
+            userPreferences.put("PASSWORD", password);
+            userPreferences.put("PRIVILEGES", privileges);
+        }
     }
-
 
     public static UserSession getInstance(String userName,String password, String privileges) {
         if(instance == null) {
@@ -52,7 +52,6 @@ public class UserSession {
     public  String getPrivileges() {
         return this.privileges;
     }
-
 
     @Override
     public  String toString() {
