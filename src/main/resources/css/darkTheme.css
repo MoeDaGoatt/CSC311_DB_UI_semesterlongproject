@@ -3,25 +3,25 @@
 }
 
 .db_btn {
-    -fx-background-color: #555;
+    -fx-background-color: #FFD700;
     -fx-radius: 2;
     -fx-cursor: hand;
     -fx-font-family: "Arial";
     -fx-font-size: 14px;
     -fx-text-alignment: center;
-    -fx-text-fill: #d5d5d5;
+    -fx-text-fill: BLACK;
     -fx-alignment: CENTER;
     -fx-background-radius: 10;
     -fx-pref-width: 200px;
     -fx-pref-height: 40px;
-    -fx-text-fill: white;
+    -fx-text-fill: black;
 }
 
 .left_pane {
-    -fx-background-color: #313131;
+    -fx-background-color: #1C1C1C;
     -fx-pref-width: 130px;
     -fx-pref-height: 600px;
-        -fx-text-fill: white;
+        -fx-text-fill: #FFD700;
 }
 
 .admin_section {
@@ -30,70 +30,69 @@
 
 .table_columns {
     -fx-background-color: #171616;
-    -fx-text-fill: #e7e1e1;
+    -fx-text-fill: #FFD700;
 }
 
 
 .menu_bar{
     -fx-background-color: black;
+    -fx-text-fill: #FFFFFF;
 }
-
-.menu_bar .label{
-    -fx-background-color: black;
-    -fx-font-size: 15 pt;
-        -fx-text-fill: white;
+.menu_items {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #000000;
+    -fx-border-color: transparent ;
 }
-
-.menu_options .label{
-    -fx-background-color: black;
-        -fx-text-fill: white;
-
+.menu_items:hover {
+    -fx-background-color: #F5F5F5;
+    -fx-text-fill: #000000;
 }
-.menu_items{
-    -fx-background-color: black;
+.menu_items:selected {
+    -fx-background-color: #DFF7FF;
+    -fx-text-fill: #000000;
+
 }
 .text_field_pane {
-    -fx-background-color: #424242;
+    -fx-background-color: #2C2C2C;
 }
 
 .text_field {
     -fx-background-color: black;
-    -fx-text-fill: white;
+    -fx-text-fill: #FFD700;
 }
 
 
 
 .image_view{
     -fx-background-color: black;
-    -fx-border-color: white;
+    -fx-border-color: #FDD700;
     -fx-border-width: 2;
-    -fx-stroke: white;
+    -fx-stroke: #FDD700;
 }
 .table-view:focused .table-row-cell:selected .table-cell {
-    -fx-background-color: lightBlue;
-    -fx-text-fill: grey;
+    -fx-background-color: #FFA500;
+    -fx-text-fill: BLACK;
 }
 .table-view .column-header,
 .table-view .column-header-background .filler {
-    -fx-background-color:  #6622CC;
+    -fx-background-color:  #FDD700;
 }
 .table-view .column-header .label{
-   -fx-text-fill: white;
+   -fx-text-fill: BLACK;
    -fx-font-weight: bold;
    -fx-alignment: CENTER_LEFT;
 }
 .table-view .cell{
    -fx-cell-size: 35;
-  -fx-alignment: center-left;
-  -fx-background-color: #444;
-  -fx-border-color: #29292D;
-  -fx-text-fill: lightgray;
+  -fx-background-color: #333333;
+  -fx-border-color: #FFD700;
+  -fx-text-fill: #FDD700;
   -fx-alignment: CENTER_LEFT;
 
 }
 .table-row-cell:selected {
-   -fx-background-color: whitesmoke;
-   -fx-text-background-color:  #aa22CC;
+   -fx-background-color: #FDD700;
+   -fx-text-background-color:  BLACK;
 }
 
 /* scroll bar starts here */
@@ -108,8 +107,8 @@
 /* The main scrollbar **track** CSS class  */
 .table-view .scroll-bar:horizontal .track,
 .table-view .scroll-bar:vertical .track{
-	-fx-background-color: transparent;
-	-fx-border-color:derive( #6622CC,80%);
+	-fx-background-color: #1C1C1C;
+	-fx-border-color:#FDD700;
 
 	-fx-background-radius: 2em;
 	-fx-border-radius:2em;
@@ -118,7 +117,7 @@
 /* The main scrollbar **thumb** CSS class which we drag every time (movable) */
 .table-view .scroll-bar:horizontal .thumb,
 .table-view .scroll-bar:vertical .thumb {
-    -fx-background-color:derive( #6622CC,90%);
+    -fx-background-color: #FDD700;
 	-fx-background-insets: 2, 0, 0;
 	-fx-background-radius: 2em;
 

@@ -31,7 +31,6 @@ public class MainApplication extends Application {
         this.primaryStage.setResizable(false);
         primaryStage.getIcons().add(icon);
         primaryStage.setTitle("FSC CSC311 _ Database Project");
-
         showScene1();
     }
 
@@ -39,12 +38,10 @@ public class MainApplication extends Application {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/view/splashscreen.fxml"));
             Scene scene = new Scene(root, 900, 600);
-
-            applyStylesheet(scene, "/css/default.css");
-
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add(getClass().getResource( "/css/default.css").toExternalForm());
             primaryStage.setScene(scene);
             primaryStage.show();
-
             changeScene();
         } catch (Exception e) {
             e.printStackTrace();
@@ -55,18 +52,15 @@ public class MainApplication extends Application {
         try {
             Parent newRoot = FXMLLoader.load(getClass().getResource("/view/login.fxml").toURI().toURL());
             Scene currentScene = primaryStage.getScene();
-            Parent currentRoot = currentScene.getRoot();
-
-            applyStylesheet(currentScene, "/css/default.css");
-
-            FadeTransition fadeOut = new FadeTransition(Duration.seconds(3), currentRoot);
+//            Parent currentRoot = currentScene.getRoot();
+            currentScene.getStylesheets().clear();
+            currentScene.getStylesheets().add(getClass().getResource( "/css/default.css").toExternalForm());
+            FadeTransition fadeOut = new FadeTransition(Duration.seconds(3), currentScene.getRoot());
             fadeOut.setFromValue(1);
             fadeOut.setToValue(0);
             fadeOut.setOnFinished(e -> {
                 Scene newScene = new Scene(newRoot, 900, 600);
-
-                applyStylesheet(newScene, "/css/default.css");
-
+                newScene.getStylesheets().add(getClass().getResource( "/css/default.css").toExternalForm());
                 primaryStage.setScene(newScene);
                 primaryStage.show();
             });
@@ -76,10 +70,7 @@ public class MainApplication extends Application {
         }
     }
 
-    private void applyStylesheet(Scene scene, String stylesheetPath) {
-        scene.getStylesheets().clear();
-        scene.getStylesheets().add(getClass().getResource(stylesheetPath).toExternalForm());
-    }
+
     public void signup(ActionEvent actionEvent) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/view/signup.fxml"));

@@ -351,13 +351,8 @@ public class DB_GUI_Controller implements Initializable {
     public void lightTheme(ActionEvent actionEvent) {
         try {
             Scene scene = menuBar.getScene();
-            Stage stage = (Stage) scene.getWindow();
-            stage.getScene().getStylesheets().clear();
-            scene.getStylesheets().add(getClass().getResource("/css/lightTheme.css").toExternalForm());
-            stage.setScene(scene);
-            stage.show();
-            System.out.println("light " + scene.getStylesheets());
-
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add(getClass().getResource("/css/default.css").toExternalForm());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -365,14 +360,14 @@ public class DB_GUI_Controller implements Initializable {
 
     public void darkTheme(ActionEvent actionEvent) {
         try {
-            Stage stage = (Stage) menuBar.getScene().getWindow();
-            Scene scene = stage.getScene();
+            Scene scene = menuBar.getScene();
             scene.getStylesheets().clear();
             scene.getStylesheets().add(getClass().getResource("/css/darkTheme.css").toExternalForm());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 
     public void showSomeone() {
         Dialog<Results> dialog = new Dialog<>();
