@@ -27,9 +27,13 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.Person;
@@ -86,6 +90,8 @@ public class DB_GUI_Controller implements Initializable {
     @FXML
     MenuBar menuBar;
     @FXML
+    MenuItem ChangePic;
+    @FXML
     private TableView<Person> tv;
     @FXML
     private TableColumn<Person, Integer> tv_id;
@@ -97,6 +103,15 @@ public class DB_GUI_Controller implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
+            ChangePic.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN));
+            ChangePic.setOnAction(event -> showImage());
+
+            importCSV.setAccelerator(new KeyCodeCombination(KeyCode.I, KeyCombination.CONTROL_DOWN));
+            importCSV.setOnAction(event -> importCSVFile(null));
+
+            exportCSV.setAccelerator(new KeyCodeCombination(KeyCode.E, KeyCombination.CONTROL_DOWN));
+
+            exportCSV.setOnAction(event -> exportCSVFile(null));
             tv_id.setCellValueFactory(new PropertyValueFactory<>("id"));
             tv_fn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
             tv_ln.setCellValueFactory(new PropertyValueFactory<>("lastName"));
@@ -177,7 +192,6 @@ public class DB_GUI_Controller implements Initializable {
             });
 
 
-
             tv.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && tv.getSelectionModel().getSelectedItem() == null) {
                     Person newPerson = new Person("", "", "", "", "", "");
@@ -250,6 +264,8 @@ public class DB_GUI_Controller implements Initializable {
             throw new RuntimeException(e);
         }
     }
+
+
 
     private void validateForm() {
         boolean isFormFilled = !first_name.getText().isEmpty() ||
@@ -348,7 +364,11 @@ public class DB_GUI_Controller implements Initializable {
             Parent root = FXMLLoader.load(getClass().getResource("/view/about.fxml"));
             Stage stage = new Stage();
             Scene scene = new Scene(root, 600, 500);
+            stage.setTitle("About");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setResizable(false);
             stage.setScene(scene);
+            stage.alwaysOnTopProperty();
             stage.showAndWait();
         } catch (Exception e) {
             e.printStackTrace();

@@ -122,3 +122,6 @@
 	-fx-background-radius: 2em;
 
 }
+.status_message_label {
+    -fx-text-fill: white;
+}
