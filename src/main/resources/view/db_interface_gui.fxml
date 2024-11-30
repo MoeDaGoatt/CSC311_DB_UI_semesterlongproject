@@ -50,6 +50,7 @@
                             <items>
                                 <MenuItem fx:id="importCSV" mnemonicParsing="false" onAction="#importCSVFile" styleClass="menu_items" text="Import CSV file" />
                                 <MenuItem fx:id="exportCSV" mnemonicParsing="false" onAction="#exportCSVFile" styleClass="menu_items" text="Export CSV file" />
+                                <MenuItem fx:id="printMenuItem" mnemonicParsing="false" onAction="#handlePrintAction" text="Print" />
                             </items>
                         </Menu>
                         <Menu mnemonicParsing="false" styleClass="menu_options" text="Help">
@@ -77,10 +78,10 @@
                 </VBox>
             </left>
             <bottom>
-                <HBox prefHeight="30.0" prefWidth="892.0" styleClass="admin_section" BorderPane.alignment="CENTER">
+                <HBox prefHeight="60.0" prefWidth="892.0" styleClass="admin_section" BorderPane.alignment="CENTER" spacing="5.0">
                <children>
-                   <ProgressBar fx:id="progressBar" prefHeight="30.0" prefWidth="393.0" progress="0.0" />
                    <Label fx:id="statusMessageLabel" alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="247.0" styleClass="status_message_label" text="Status Message Here" />
+                   <ProgressBar fx:id="progressBar" prefHeight="30.0" prefWidth="393.0" progress="0.0" />
                </children></HBox>
             </bottom>
          <right>

@@ -13,12 +13,18 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.ProgressBar;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -29,12 +35,14 @@ import javafx.util.Duration;
 import model.Person;
 import service.MyLogger;
 
+import java.awt.*;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 
 public class DB_GUI_Controller implements Initializable {
@@ -42,6 +50,8 @@ public class DB_GUI_Controller implements Initializable {
     private static final String Rdep = "^^[A-Za-z\\\\s]{1,50}$";
     private static final String Rmajors = "^[A-Za-z\\\\s]{1,50}$";
     private static final String Remail = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+    @FXML
+    private MenuItem printMenuItem;
     @FXML
     private Label statusMessageLabel;
     @FXML
@@ -97,12 +107,90 @@ public class DB_GUI_Controller implements Initializable {
 
             editBtn.setDisable(true);
             deleteBtn.setDisable(true);
-
             editItem.setDisable(true);
             deleteItem.setDisable(true);
             ClearItem.setDisable(true);
             CopyItem.setDisable(true);
 
+            tv.setEditable(true);
+
+            tv_fn.setCellFactory(TextFieldTableCell.forTableColumn());
+            tv_fn.setOnEditCommit(event -> {
+                Person p = event.getRowValue();
+                p.setFirstName(event.getNewValue());
+                cnUtil.editUser(p.getId(), p);
+                displayMessage("Added");
+            });
+
+            tv_ln.setCellFactory(TextFieldTableCell.forTableColumn());
+            tv_ln.setOnEditCommit(event -> {
+                Person p = event.getRowValue();
+                p.setFirstName(event.getNewValue());
+                cnUtil.editUser(p.getId(), p);
+                displayMessage("Added");
+
+            });
+
+            tv_department.setCellFactory(TextFieldTableCell.forTableColumn());
+            tv_department.setOnEditCommit(event -> {
+                Person p = event.getRowValue();
+                p.setFirstName(event.getNewValue());
+                cnUtil.editUser(p.getId(),p);
+                displayMessage("Added");
+            });
+
+            tv_email.setCellFactory(TextFieldTableCell.forTableColumn());
+            tv_email.setOnEditCommit(event -> {
+                Person p = event.getRowValue();
+                p.setFirstName(event.getNewValue());
+
+                    cnUtil.editUser(p.getId(),p);
+                    displayMessage("Added");
+            });
+
+            tv_major.setCellFactory(column -> new TableCell<>() {
+                private final ComboBox<String> comboBox = new ComboBox<>();
+
+                {
+                    comboBox.setItems(FXCollections.observableArrayList(
+                            Major.CSC.name(),
+                            Major.Business.name(),
+                            Major.CPIS.name()
+                    ));
+                    comboBox.setOnAction(event -> {
+                        Person p = getTableView().getItems().get(getIndex());
+                        p.setMajor(comboBox.getValue());
+                        cnUtil.editUser(p.getId(), p); // Update database
+                        displayMessage("Major updated.");
+                    });
+                }
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setGraphic(null);
+                    } else {
+                        setGraphic(comboBox);
+                        comboBox.setValue(item);
+                    }
+                }
+            });
+
+
+
+            tv.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && tv.getSelectionModel().getSelectedItem() == null) {
+                    Person newPerson = new Person("", "", "", "", "", "");
+                    data.add(newPerson);
+                    tv.getSelectionModel().select(newPerson);
+                    displayMessage("New row added. Fill in the details.");
+                }
+            });
+
+            tv.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+                editBtn.setDisable(newValue == null);
+                deleteBtn.setDisable(newValue == null);
+            });
             tv.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Person>() {
                 @Override
                 public void changed(ObservableValue<? extends Person> observable, Person oldValue, Person newValue) {
@@ -488,6 +576,7 @@ public class DB_GUI_Controller implements Initializable {
 
 
 
+
     private static enum Major {Business, CSC, CPIS}
 
     private static class Results {
@@ -507,5 +596,43 @@ public class DB_GUI_Controller implements Initializable {
         PauseTransition pause = new PauseTransition(Duration.seconds(3));
         pause.setOnFinished(event -> statusMessageLabel.setText(""));
         pause.play();
+    }
+
+    public void handlePrintAction(ActionEvent actionEvent) {
+        PDFGenerator generator = new PDFGenerator();
+        String filePath = "StudentReport.pdf";
+        StringBuilder content = new StringBuilder();
+        content.append("Student Report \n\n");
+
+        Map<String, Long> studentsByMajor = data.stream()
+                .collect(Collectors.groupingBy(Person::getMajor, Collectors.counting()));
+
+        studentsByMajor.forEach((major, count) -> {
+            content.append(String.format("Major: %s, Number of Students: %d\n", major, count));
+
+        });
+        if (studentsByMajor.isEmpty()) {
+            displayMessage("No data is available to generate a pdf with");
+            return;
+        }
+
+        try {
+            generator.generatePdf(filePath, content.toString());
+            displayMessage("PDF report generated successfully: " + filePath);
+
+            File pdfFile = new File(filePath);
+            if (pdfFile.exists()) {
+                if (Desktop.isDesktopSupported()) {
+                    Desktop.getDesktop().open(pdfFile);
+                } else {
+                    displayMessage("PDF generated, but your system does not support automatic opening.");
+                }
+            } else {
+                displayMessage("PDF file not found after generation.");
+            }
+        } catch (IOException e) {
+            displayMessage("Error generating PDF report.");
+            e.printStackTrace();
+        }
     }
 }

@@ -48,6 +48,14 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- iText PDF dependency -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.29</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
