@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="viewmodel.AboutController">
    <children>
-      <TextArea layoutX="6.0" layoutY="51.0" prefHeight="343.0" prefWidth="584.0" text="Your text goes here " wrapText="true">
-         <font>
-            <Font name="System Bold" size="16.0" />
-         </font>
-      </TextArea>
-      <Label alignment="TOP_LEFT" layoutX="8.0" layoutY="11.0" prefHeight="44.0" prefWidth="542.0" text="Developer: MM mM">
-         <font>
-            <Font name="System Bold" size="26.0" />
-         </font>
-      </Label>
+      <Label fx:id="titleLabel" alignment="CENTER" layoutX="150.0" layoutY="10.0" prefHeight="44.0" prefWidth="300.0"
+             text="About Cricket" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-alignment: center;" />
+
+      <TextFlow layoutX="20.0" layoutY="60.0" prefHeight="250.0" prefWidth="560.0">
+         <Text text="Cricket is a bat-and-ball game played between two teams of eleven players. " style="-fx-font-size: 17px; -fx-fill: #333333;" />
+         <Text text="It originated in England and has become a global sport governed by the International Cricket Council (ICC). " style="-fx-font-size: 17px; -fx-fill: #333333;" />
+         <Text text="Cricket has formats ranging from Test matches lasting five days to T20 matches lasting just a few hours. " style="-fx-font-size: 17px; -fx-fill: #333333;" />
+         <Text text="The game is known for its exciting mix of strategy and skill." style="-fx-font-size: 17px; -fx-fill: #333333;" />
+      </TextFlow>
+
+      <Hyperlink fx:id="cricketLink" layoutX="200.0" layoutY="320.0" prefHeight="30.0" prefWidth="200.0"
+                 text="Visit ICC Cricket Official Website" style="-fx-font-size: 12px; -fx-alignment: center;" />
+
+      <Button fx:id="closeButton" layoutX="250.0" layoutY="360.0" mnemonicParsing="false"
+              onAction="#closeAbout" text="Close" />
    </children>
 </AnchorPane>

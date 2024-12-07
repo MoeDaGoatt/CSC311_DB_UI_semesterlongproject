@@ -39,6 +39,7 @@ import javafx.util.Duration;
 import model.Person;
 import service.MyLogger;
 
+import java.awt.TextArea;
 import java.awt.*;
 import java.io.*;
 import java.net.URL;
@@ -100,9 +101,17 @@ public class DB_GUI_Controller implements Initializable {
     private final DbConnectivityClass cnUtil = new DbConnectivityClass();
     private final ObservableList<Person> data = cnUtil.getData();
 
+    @FXML
+    private TextArea aboutText;
+    @FXML
+    private Hyperlink cricketLink;
+    @FXML
+    private Button closeButton;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
+
             ChangePic.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN));
             ChangePic.setOnAction(event -> showImage());
 
@@ -110,8 +119,8 @@ public class DB_GUI_Controller implements Initializable {
             importCSV.setOnAction(event -> importCSVFile(null));
 
             exportCSV.setAccelerator(new KeyCodeCombination(KeyCode.E, KeyCombination.CONTROL_DOWN));
-
             exportCSV.setOnAction(event -> exportCSVFile(null));
+
             tv_id.setCellValueFactory(new PropertyValueFactory<>("id"));
             tv_fn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
             tv_ln.setCellValueFactory(new PropertyValueFactory<>("lastName"));
@@ -168,9 +177,9 @@ public class DB_GUI_Controller implements Initializable {
 
                 {
                     comboBox.setItems(FXCollections.observableArrayList(
-                            Major.CSC.name(),
-                            Major.Business.name(),
-                            Major.CPIS.name()
+                            Major.Bowler.name(),
+                            Major.Batter.name(),
+                            Major.Fielder.name()
                     ));
                     comboBox.setOnAction(event -> {
                         Person p = getTableView().getItems().get(getIndex());
@@ -358,17 +367,32 @@ public class DB_GUI_Controller implements Initializable {
         System.exit(0);
     }
 
+
     @FXML
     protected void displayAbout() {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/view/about.fxml"));
             Stage stage = new Stage();
             Scene scene = new Scene(root, 600, 500);
-            stage.setTitle("About");
+            stage.setTitle("About Cricket");
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setResizable(false);
             stage.setScene(scene);
             stage.alwaysOnTopProperty();
+            stage.showAndWait();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    @FXML
+    protected void displayHelp() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/view/help.fxml"));
+            Stage stage = new Stage();
+            stage.setTitle("Help");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setResizable(false);
+            stage.setScene(new Scene(root, 700, 700));
             stage.showAndWait();
         } catch (Exception e) {
             e.printStackTrace();
@@ -597,7 +621,7 @@ public class DB_GUI_Controller implements Initializable {
 
 
 
-    private static enum Major {Business, CSC, CPIS}
+    private static enum Major {Bowler, Batter, Fielder}
 
     private static class Results {
 
@@ -617,6 +641,7 @@ public class DB_GUI_Controller implements Initializable {
         pause.setOnFinished(event -> statusMessageLabel.setText(""));
         pause.play();
     }
+
 
     public void handlePrintAction(ActionEvent actionEvent) {
         PDFGenerator generator = new PDFGenerator();
@@ -655,4 +680,5 @@ public class DB_GUI_Controller implements Initializable {
             e.printStackTrace();
         }
     }
+
 }

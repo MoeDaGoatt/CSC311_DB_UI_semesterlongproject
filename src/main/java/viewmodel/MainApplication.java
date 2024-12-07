@@ -10,7 +10,6 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.w3c.dom.Node;
 
 import java.io.IOException;
 
@@ -30,7 +29,7 @@ public class MainApplication extends Application {
         this.primaryStage = primaryStage;
         this.primaryStage.setResizable(false);
         primaryStage.getIcons().add(icon);
-        primaryStage.setTitle("FSC CSC311 _ Database Project");
+        primaryStage.setTitle("Cricket Registration");
         showScene1();
     }
 
